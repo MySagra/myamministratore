@@ -73,19 +73,21 @@ export function FoodsContent({ initialFoods, categories, ingredients, printers }
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <FoodsToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        categoryFilter={categoryFilter}
-        onCategoryFilterChange={setCategoryFilter}
-        categoryNames={categoryNames}
-        onCreateNew={handleCreate}
-      />
-      <FoodsTable
-        foods={filteredFoods}
-        onEdit={handleEdit}
-        onToggle={handleToggled}
-      />
+      <div className="max-w-4xl mx-auto w-full space-y-4">
+        <FoodsToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+          categoryNames={categoryNames}
+          onCreateNew={handleCreate}
+        />
+        <FoodsTable
+          foods={filteredFoods}
+          onEdit={handleEdit}
+          onToggle={handleToggled}
+        />
+      </div>
       <FoodDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

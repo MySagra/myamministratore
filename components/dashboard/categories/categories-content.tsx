@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Category } from "@/lib/api-types";
+import { Category, Printer } from "@/lib/api-types";
 import { reorderCategories } from "@/actions/categories";
 import { CategoriesToolbar } from "./categories-toolbar";
 import { CategoriesTable } from "./categories-table";
@@ -11,9 +11,10 @@ import { toast } from "sonner";
 
 interface CategoriesContentProps {
   initialCategories: Category[];
+  printers: Printer[];
 }
 
-export function CategoriesContent({ initialCategories }: CategoriesContentProps) {
+export function CategoriesContent({ initialCategories, printers }: CategoriesContentProps) {
   const [categories, setCategories] = useState<Category[]>(
     [...initialCategories].sort((a, b) => a.position - b.position)
   );
@@ -73,13 +74,13 @@ export function CategoriesContent({ initialCategories }: CategoriesContentProps)
 
   function handleReorder(reordered: Category[]) {
     setCategories(reordered);
-    
+
     // Verifica se l'ordine è effettivamente cambiato rispetto a quello iniziale
     const hasChanged = reordered.some((cat, index) => {
       const originalCategory = initialCategories.find(c => c.id === cat.id);
       return originalCategory && originalCategory.position !== index;
     });
-    
+
     setHasOrderChanged(hasChanged);
   }
 
@@ -127,6 +128,7 @@ export function CategoriesContent({ initialCategories }: CategoriesContentProps)
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           category={editingCategory}
+          printers={printers}
           onSaved={handleSaved}
           onDelete={handleDelete}
         />

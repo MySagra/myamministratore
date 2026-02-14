@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Category } from "@/lib/api-types";
+import { Category, Printer } from "@/lib/api-types";
 import { createCategory, updateCategory, uploadCategoryImage } from "@/actions/categories";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +58,7 @@ import { z } from "zod";
 const categorySchema = z.object({
   name: z.string().min(1, "Il nome è obbligatorio"),
   available: z.boolean(),
+  printerId: z.string().optional(),
 });
 
 type CategoryFormValues = z.input<typeof categorySchema>;
@@ -59,6 +67,7 @@ interface CategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category: Category | null;
+  printers?: Printer[];
   onSaved: (category: Category) => void;
   onDelete?: (category: Category) => void;
 }
@@ -67,6 +76,7 @@ export function CategoryDialog({
   open,
   onOpenChange,
   category,
+  printers = [],
   onSaved,
   onDelete,
 }: CategoryDialogProps) {
@@ -82,6 +92,7 @@ export function CategoryDialog({
     defaultValues: {
       name: "",
       available: true,
+      printerId: "none",
     },
   });
 
@@ -91,11 +102,13 @@ export function CategoryDialog({
         form.reset({
           name: category.name,
           available: category.available,
+          printerId: category.printerId || "none",
         });
       } else {
         form.reset({
           name: "",
           available: true,
+          printerId: "none",
         });
       }
       setImagePreview(null);
@@ -147,6 +160,7 @@ export function CategoryDialog({
       const data = {
         name: values.name.trim(),
         available: values.available,
+        printerId: values.printerId === "none" ? null : values.printerId,
       };
 
       let savedCategory;
@@ -234,6 +248,38 @@ export function CategoryDialog({
                     )}
                   />
                 </div>
+
+                <Field>
+                  <FieldLabel>Stampante Predefinita</FieldLabel>
+                  <FormField
+                    control={form.control}
+                    name="printerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleziona stampante" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Nessuna stampante</SelectItem>
+                            {printers.map((printer) => (
+                              <SelectItem key={printer.id} value={printer.id}>
+                                {printer.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </Field>
 
                 <Field>
                   <FieldLabel>Immagine</FieldLabel>

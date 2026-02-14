@@ -86,21 +86,23 @@ export function OrdersContent({ initialData, dateFrom, dateTo }: OrdersContentPr
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <OrdersToolbar
-        searchQuery={searchQuery}
-        onSearchChange={handleSearch}
-        statusFilter={statusFilter}
-        onStatusFilterChange={handleStatusFilter}
-        onRefresh={handleRefresh}
-        isLoading={isLoading}
-      />
-      <OrdersTable
-        orders={orders}
-        pagination={pagination}
-        isLoading={isLoading}
-        onViewDetail={handleViewDetail}
-        onPageChange={handlePageChange}
-      />
+      <div className="max-w-4xl mx-auto w-full space-y-4">
+        <OrdersToolbar
+          searchQuery={searchQuery}
+          onSearchChange={handleSearch}
+          statusFilter={statusFilter}
+          onStatusFilterChange={handleStatusFilter}
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+        />
+        <OrdersTable
+          orders={orders}
+          pagination={pagination}
+          isLoading={isLoading}
+          onViewDetail={handleViewDetail}
+          onPageChange={handlePageChange}
+        />
+      </div>
       <OrderDetailDialog
         open={detailOpen}
         onOpenChange={setDetailOpen}
