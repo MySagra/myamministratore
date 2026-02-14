@@ -60,16 +60,18 @@ export function PrintersContent({ initialPrinters }: PrintersContentProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <PrintersToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onCreateNew={handleCreate}
-      />
-      <PrintersTable
-        printers={filteredPrinters}
-        onEdit={handleEdit}
-        onStatusUpdate={handleStatusUpdated}
-      />
+      <div className="max-w-4xl mx-auto w-full space-y-4">
+        <PrintersToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onCreateNew={handleCreate}
+        />
+        <PrintersTable
+          printers={filteredPrinters}
+          onEdit={handleEdit}
+          onStatusUpdate={handleStatusUpdated}
+        />
+      </div>
       <PrinterDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

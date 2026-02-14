@@ -57,15 +57,17 @@ export function UsersContent({ initialUsers, roles }: UsersContentProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <UsersToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onCreateNew={handleCreate}
-      />
-      <UsersTable
-        users={filteredUsers}
-        onEdit={handleEdit}
-      />
+      <div className="max-w-4xl mx-auto w-full space-y-4">
+        <UsersToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onCreateNew={handleCreate}
+        />
+        <UsersTable
+          users={filteredUsers}
+          onEdit={handleEdit}
+        />
+      </div>
       <UserDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
