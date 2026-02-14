@@ -1,36 +1,185 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+<p align="center">
+  <img src="public/banner.png" alt="Banner" width="100%" />
+</p>
+</div>
 
-First, run the development server:
+# MyAmministratore
+
+> Pannello di amministrazione per MySagra - Sistema di gestione ordini e cucina per sagre ed eventi
+
+## 📋 Descrizione
+
+MyAmministratore è un'applicazione web moderna per la gestione completa di sagre ed eventi. Permette di amministrare categorie, cibi, ingredienti, ordini, casse, stampanti e utenti attraverso un'interfaccia intuitiva e responsive.
+
+## ✨ Funzionalità
+
+- 🍽️ **Gestione Cucina**
+  - Categorie con upload immagini
+  - Cibi e piatti con ingredienti
+  - Gestione ingredienti e allergeni
+  
+- 📦 **Gestione Ordini**
+  - Visualizzazione e monitoraggio ordini in tempo reale
+  - Stati ordine personalizzabili
+  
+- 💰 **Gestione Casse**
+  - Configurazione casse multiple
+  - Monitoraggio transazioni
+  
+- 🖨️ **Stampanti**
+  - Configurazione stampanti di rete
+  - Gestione code di stampa
+  
+- 👥 **Utenti**
+  - Sistema di autenticazione sicuro
+  - Gestione ruoli e permessi
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **UI Components**: [Shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Authentication**: [NextAuth.js 5](https://next-auth.js.org/)
+- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Drag & Drop**: [@dnd-kit](https://dndkit.com/)
+- **Notifications**: [Sonner](https://sonner.emilkowal.ski/)
+
+## 📦 Prerequisiti
+
+- **Node.js** >= 20.x
+- **npm** >= 10.x
+- **Docker** (opzionale, per deployment)
+
+## 🚀 Installazione Locale
+
+### 1. Clona il repository
+
+```bash
+git clone https://github.com/MySagra/myamministratore.git
+cd myamministratore
+```
+
+### 2. Installa le dipendenze
+
+```bash
+npm install
+```
+
+### 3. Configura le variabili d'ambiente
+
+Crea un file `.env` nella root del progetto:
+
+```env
+# Backend API URL
+API_URL=http://localhost:4300
+
+# NextAuth Configuration
+AUTH_SECRET=your-secret-key-here
+AUTH_URL=http://localhost:5000
+```
+
+> **Nota**: Genera `AUTH_SECRET` con: `openssl rand -base64 32`
+
+### 4. Avvia il server di sviluppo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+L'applicazione sarà disponibile su **http://localhost:5000**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🐳 Deployment con Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Build dell'immagine
 
-## Learn More
+```bash
+docker compose build
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Avvia i container
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker compose up -d
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+L'applicazione sarà disponibile su **http://localhost:5000**
 
-## Deploy on Vercel
+### Verifica i log
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker compose logs -f amministratore
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Ferma i container
+
+```bash
+docker compose down
+```
+
+## 📁 Struttura del Progetto
+
+```
+myamministratore/
+├── app/                    # Next.js App Router
+│   ├── dashboard/         # Pagine dashboard
+│   ├── login/             # Pagina login
+│   └── layout.tsx         # Layout principale
+├── components/            # Componenti React
+│   ├── dashboard/        # Componenti specifici dashboard
+│   └── ui/               # Componenti UI riutilizzabili (Shadcn)
+├── actions/              # Server Actions
+├── lib/                  # Utilities e configurazioni
+│   ├── api.ts           # Client API
+│   ├── api-types.ts     # TypeScript types
+│   └── auth.ts          # Configurazione NextAuth
+├── public/              # Asset statici
+└── docker-compose.yml   # Configurazione Docker
+```
+
+## 🔧 Scripts Disponibili
+
+```bash
+npm run dev      # Avvia il server di sviluppo (porta 5000)
+npm run build    # Build di produzione
+npm start        # Avvia il server di produzione (porta 5000)
+npm run lint     # Esegue ESLint
+```
+
+## 🌐 Variabili d'Ambiente
+
+| Variabile | Descrizione | Default |
+|-----------|-------------|---------|
+| `API_URL` | URL del backend API | `http://localhost:4300` |
+| `AUTH_SECRET` | Secret key per NextAuth | - |
+| `AUTH_URL` | URL pubblico dell'applicazione | `http://localhost:5000` |
+| `NODE_ENV` | Ambiente di esecuzione | `development` |
+
+## 🤝 Contribuire
+
+Questo progetto fa parte dell'ecosistema **MySagra**. Per contribuire:
+
+1. Fork del repository
+2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit delle modifiche (`git commit -m 'Add some AmazingFeature'`)
+4. Push al branch (`git push origin feature/AmazingFeature`)
+5. Apri una Pull Request
+
+## 📄 Licenza
+
+Questo progetto è parte di MySagra. Per informazioni sulla licenza, visita [MySagra.com](https://mysagra.com)
+
+## 🔗 Link Utili
+
+- [Documentazione MySagra](https://mysagra.com)
+- [Supporto Professionale](https://mysagra.com/#professional-services)
+- [GitHub MySagra](https://github.com/MySagra)
+
+## 📞 Supporto
+
+Per assistenza e supporto professionale, visita [mysagra.com/#professional-services](https://mysagra.com/#professional-services)
+
+---
+
+Made with ❤️ by [MySagra](https://mysagra.com)
