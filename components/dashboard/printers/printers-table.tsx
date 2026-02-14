@@ -1,0 +1,281 @@
+"use client";
+
+import { useState, useMemo, useEffect } from "react";
+import { Printer } from "@/lib/api-types";
+import { updatePrinterStatus } from "@/actions/printers";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PencilIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
+import { toast } from "sonner";
+
+interface PrintersTableProps {
+  printers: Printer[];
+  onEdit: (printer: Printer) => void;
+  onDelete: (printer: Printer) => void;
+  onStatusUpdate: (updated: Printer) => void;
+}
+
+type SortColumn = "name" | "ip" | "port" | "description" | "status" | null;
+type SortDirection = "asc" | "desc";
+
+const statusLabels: Record<string, string> = {
+  ONLINE: "Online",
+  OFFLINE: "Offline",
+  ERROR: "Errore",
+};
+
+const statusVariants: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  ONLINE: "default",
+  OFFLINE: "secondary",
+  ERROR: "destructive",
+};
+
+export function PrintersTable({
+  printers,
+  onEdit,
+  onDelete,
+  onStatusUpdate,
+}: PrintersTableProps) {
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [sortColumn, setSortColumn] = useState<SortColumn>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  useEffect(() => {
+    const savedColumn = localStorage.getItem("printers-table-sort-column");
+    const savedDirection = localStorage.getItem("printers-table-sort-direction");
+    if (savedColumn) {
+      setSortColumn(savedColumn as SortColumn);
+    }
+    if (savedDirection) {
+      setSortDirection(savedDirection as SortDirection);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (sortColumn) {
+      localStorage.setItem("printers-table-sort-column", sortColumn);
+    } else {
+      localStorage.removeItem("printers-table-sort-column");
+    }
+    localStorage.setItem("printers-table-sort-direction", sortDirection);
+  }, [sortColumn, sortDirection]);
+
+  function handleSort(column: SortColumn) {
+    if (sortColumn === column) {
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else {
+        setSortColumn(null);
+        setSortDirection("asc");
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  }
+
+  const sortedPrinters = useMemo(() => {
+    if (!sortColumn) return printers;
+
+    return [...printers].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortColumn) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "ip":
+          aValue = a.ip;
+          bValue = b.ip;
+          break;
+        case "port":
+          aValue = a.port;
+          bValue = b.port;
+          break;
+        case "description":
+          aValue = (a.description || "").toLowerCase();
+          bValue = (b.description || "").toLowerCase();
+          break;
+        case "status":
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [printers, sortColumn, sortDirection]);
+
+  async function handleStatusChange(
+    printer: Printer,
+    newStatus: "ONLINE" | "OFFLINE" | "ERROR"
+  ) {
+    setUpdatingId(printer.id);
+    try {
+      const updated = await updatePrinterStatus(printer.id, newStatus);
+      onStatusUpdate(updated);
+      toast.success(`Stato di "${printer.name}" aggiornato`);
+    } catch (error) {
+      toast.error("Errore nell'aggiornamento dello stato");
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  function SortIcon({ column }: { column: SortColumn }) {
+    if (sortColumn !== column) {
+      return <ArrowUpDownIcon className="h-4 w-4 ml-1 opacity-30" />;
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUpIcon className="h-4 w-4 ml-1" />
+    ) : (
+      <ArrowDownIcon className="h-4 w-4 ml-1" />
+    );
+  }
+
+  if (sortedPrinters.length === 0) {
+    return (
+      <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed p-8">
+        <p className="text-muted-foreground text-sm">
+          Nessuna stampante trovata
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50">
+            <TableHead>
+              <button
+                onClick={() => handleSort("name")}
+                className="flex items-center hover:text-foreground transition-colors font-medium"
+              >
+                Nome
+                <SortIcon column="name" />
+              </button>
+            </TableHead>
+            <TableHead className="w-40">
+              <button
+                onClick={() => handleSort("ip")}
+                className="flex items-center hover:text-foreground transition-colors font-medium"
+              >
+                IP
+                <SortIcon column="ip" />
+              </button>
+            </TableHead>
+            <TableHead className="w-20">
+              <button
+                onClick={() => handleSort("port")}
+                className="flex items-center mx-auto hover:text-foreground transition-colors font-medium"
+              >
+                Porta
+                <SortIcon column="port" />
+              </button>
+            </TableHead>
+            <TableHead className="w-48">
+              <button
+                onClick={() => handleSort("description")}
+                className="flex items-center hover:text-foreground transition-colors font-medium"
+              >
+                Descrizione
+                <SortIcon column="description" />
+              </button>
+            </TableHead>
+            <TableHead className="w-36">
+              <button
+                onClick={() => handleSort("status")}
+                className="flex items-center mx-auto hover:text-foreground transition-colors font-medium"
+              >
+                Stato
+                <SortIcon column="status" />
+              </button>
+            </TableHead>
+            <TableHead className="w-24 text-right">Azioni</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedPrinters.map((printer) => (
+            <TableRow key={printer.id}>
+              <TableCell className="font-medium">{printer.name}</TableCell>
+              <TableCell className="font-mono text-sm">{printer.ip}</TableCell>
+              <TableCell className="text-center">{printer.port}</TableCell>
+              <TableCell className="text-muted-foreground text-sm">
+                {printer.description || "-"}
+              </TableCell>
+              <TableCell className="text-center">
+                <Select
+                  value={printer.status}
+                  onValueChange={(v) =>
+                    handleStatusChange(
+                      printer,
+                      v as "ONLINE" | "OFFLINE" | "ERROR"
+                    )
+                  }
+                  disabled={updatingId === printer.id}
+                >
+                  <SelectTrigger className="w-28 mx-auto">
+                    <SelectValue>
+                      <Badge variant={statusVariants[printer.status]}>
+                        {statusLabels[printer.status]}
+                      </Badge>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ONLINE">Online</SelectItem>
+                    <SelectItem value="OFFLINE">Offline</SelectItem>
+                    <SelectItem value="ERROR">Errore</SelectItem>
+                  </SelectContent>
+                </Select>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(printer)}
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(printer)}
+                  >
+                    <Trash2Icon className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
