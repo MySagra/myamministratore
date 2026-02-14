@@ -10,21 +10,18 @@ import { toast } from "sonner";
 
 interface OrdersContentProps {
   initialData: PaginatedOrders;
+  dateFrom?: Date;
+  dateTo?: Date;
 }
 
-export function OrdersContent({ initialData }: OrdersContentProps) {
+export function OrdersContent({ initialData, dateFrom, dateTo }: OrdersContentProps) {
   const [orders, setOrders] = useState<OrderListResponse[]>(
-    initialData?.orders ?? []
+    initialData?.data ?? []
   );
   const [pagination, setPagination] = useState(initialData?.pagination ?? {
     currentPage: 1,
-    totalOrdersPages: 0,
-    totalOrdersItems: 0,
-    itemsPerPage: 20,
-    hasNextPage: false,
-    hasPrevPage: false,
-    nextPage: null,
-    prevPage: null,
+    totalPages: 0,
+    totalItems: 0,
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -51,7 +48,7 @@ export function OrdersContent({ initialData }: OrdersContentProps) {
         limit: 20,
       });
 
-      setOrders(data.orders);
+      setOrders(data.data);
       setPagination(data.pagination);
     } catch (error) {
       toast.error("Errore nel caricamento degli ordini");

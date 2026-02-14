@@ -5,16 +5,11 @@ import { PaginatedOrders } from "@/lib/api-types";
 
 export default async function OrdersPage() {
   let ordersData: PaginatedOrders = {
-    orders: [],
+    data: [],
     pagination: {
       currentPage: 1,
-      totalOrdersPages: 0,
-      totalOrdersItems: 0,
-      itemsPerPage: 20,
-      hasNextPage: false,
-      hasPrevPage: false,
-      nextPage: null,
-      prevPage: null,
+      totalPages: 0,
+      totalItems: 0,
     },
   };
 

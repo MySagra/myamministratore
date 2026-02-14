@@ -1,263 +1,232 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { OrderDetailResponse, OrderStatus } from "@/lib/api-types";
-import { getOrderById, updateOrderStatus } from "@/actions/orders";
-import { toast } from "sonner";
-import { Loader2Icon, ClipboardListIcon } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { OrderDetailResponse } from '@/lib/api-types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FileText, Printer } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { getOrderById } from '@/actions/orders';
 
 interface OrderDetailDialogProps {
+  orderId: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  orderId: number | null;
-  onOrderUpdated: () => void;
+  onOrderUpdated?: () => void;
 }
 
-const statusLabels: Record<string, string> = {
-  PENDING: "In attesa",
-  CONFIRMED: "Confermato",
-  COMPLETED: "Completato",
-  PICKED_UP: "Ritirato",
-};
-
-const statusVariants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  PENDING: "outline",
-  CONFIRMED: "default",
-  COMPLETED: "secondary",
-  PICKED_UP: "secondary",
-};
-
-const allStatuses: OrderStatus[] = ["PENDING", "CONFIRMED", "COMPLETED", "PICKED_UP"];
-
-export function OrderDetailDialog({
-  open,
-  onOpenChange,
-  orderId,
-  onOrderUpdated,
-}: OrderDetailDialogProps) {
+export function OrderDetailDialog({ orderId, open, onOpenChange, onOrderUpdated }: OrderDetailDialogProps) {
   const [order, setOrder] = useState<OrderDetailResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open && orderId) {
-      loadOrder(orderId);
-    } else {
+      setLoading(true);
+      getOrderById(orderId)
+        .then(setOrder)
+        .catch(() => {
+          toast.error('Errore nel caricamento dell\'ordine');
+          onOpenChange(false);
+        })
+        .finally(() => setLoading(false));
+    } else if (!open) {
       setOrder(null);
     }
-  }, [open, orderId]);
-
-  async function loadOrder(id: number) {
-    setIsLoading(true);
-    try {
-      const data = await getOrderById(id);
-      setOrder(data);
-    } catch (error) {
-      toast.error("Errore nel caricamento dell'ordine");
-      onOpenChange(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleStatusChange(newStatus: string) {
-    if (!order) return;
-    setIsUpdating(true);
-    try {
-      await updateOrderStatus(order.id, newStatus as OrderStatus);
-      setOrder({ ...order, status: newStatus as OrderStatus });
-      toast.success("Stato ordine aggiornato");
-      onOrderUpdated();
-    } catch (error) {
-      toast.error("Errore nell'aggiornamento dello stato");
-    } finally {
-      setIsUpdating(false);
-    }
-  }
-
-  function formatDate(dateStr: string | null | undefined): string {
-    if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleString("it-IT", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }
+  }, [open, orderId, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col select-none">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ClipboardListIcon className="h-5 w-5" />
-            {order ? `Ordine #${order.displayCode}` : "Dettaglio Ordine"}
+            <FileText className="h-5 w-5" />
+            Dettaglio Ordine {order?.displayCode || ''}
           </DialogTitle>
           <DialogDescription>
-            {order
-              ? `Cliente: ${order.customer} — Tavolo: ${order.table}`
-              : "Caricamento..."}
+            Visualizza i dettagli completi dell'ordine
           </DialogDescription>
         </DialogHeader>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2Icon className="h-6 w-6 animate-spin text-muted-foreground" />
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Caricamento...</div>
           </div>
         ) : order ? (
-          <div className="flex flex-col gap-6">
-            {/* Order info */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Stato</p>
-                <Select
-                  value={order.status}
-                  onValueChange={handleStatusChange}
-                  disabled={isUpdating}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allStatuses.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {statusLabels[s]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Metodo di pagamento</p>
-                <p className="text-sm font-medium">
-                  {order.paymentMethod === "CASH"
-                    ? "Contanti"
-                    : order.paymentMethod === "CARD"
-                    ? "Carta"
-                    : "-"}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Creato il</p>
-                <p className="text-sm font-medium">{formatDate(order.createdAt)}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Confermato il</p>
-                <p className="text-sm font-medium">{formatDate(order.confirmedAt)}</p>
-              </div>
-              {order.ticketNumber && (
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">N° Scontrino</p>
-                  <p className="text-sm font-medium">{order.ticketNumber}</p>
-                </div>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* Categorized items */}
+          <ScrollArea className="overflow-y-auto pr-4">
             <div className="space-y-4">
-              <h4 className="text-sm font-semibold">Articoli ordinati</h4>
-              {order.categorizedItems.map((catGroup) => (
-                <div key={catGroup.category.id} className="space-y-2">
-                  <Badge variant="outline">{catGroup.category.name}</Badge>
-                  <div className="rounded-lg border">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
-                          <th className="px-3 py-2 text-left font-medium">Articolo</th>
-                          <th className="px-3 py-2 text-center font-medium w-16">Qtà</th>
-                          <th className="px-3 py-2 text-right font-medium w-24">Prezzo</th>
-                          <th className="px-3 py-2 text-right font-medium w-24">Totale</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {catGroup.items.map((item) => (
-                          <tr key={item.id} className="border-b last:border-0">
-                            <td className="px-3 py-2">
-                              <span className="font-medium">{item.food.name}</span>
-                              {item.notes && (
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  {item.notes}
-                                </p>
-                              )}
-                              {item.food.ingredients && item.food.ingredients.length > 0 && (
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  {item.food.ingredients
-                                    .map((i) => i.name)
-                                    .join(", ")}
-                                </p>
-                              )}
-                            </td>
-                            <td className="px-3 py-2 text-center">{item.quantity}</td>
-                            <td className="px-3 py-2 text-right">
-                              €{item.unitPrice.toFixed(2)}
-                            </td>
-                            <td className="px-3 py-2 text-right font-medium">
-                              €{item.total.toFixed(2)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+              {/* Order Info */}
+              <div className="grid grid-cols-4 gap-4 p-4 bg-muted dark:bg-muted/40 rounded-lg">
+                <div>
+                  <p className="text-sm text-muted-foreground">Cliente</p>
+                  <h1 className={cn("font-semibold text-sm mb-1 truncate select-none", order.customer.length < 15 ? "text-xl" : "")} title={order.customer}>
+                    {order.customer}
+                  </h1>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Tavolo</p>
+                  <p className="font-medium">{order.table}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Codice</p>
+                  <p className="font-mono font-bold text-amber-600">{order.displayCode}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Comanda</p>
+                  <p className="font-mono font-bold text-amber-600">{order.ticketNumber ?? 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Data creazione</p>
+                  <p className="text-sm">
+                    {new Date(order.createdAt).toLocaleString('it-IT', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Data conferma</p>
+                  <p className="text-sm">
+                    {order.confirmedAt ? new Date(order.confirmedAt).toLocaleString('it-IT', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Pagamento</p>
+                  <p className="font-mono font-bold text-amber-600">
+                    {order.paymentMethod === 'CARD' ? 'CARTA' : order.paymentMethod === 'CASH' ? 'CONTANTI' : order.paymentMethod || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Stato</p>
+                  <div className="font-mono font-bold text-amber-600">
+                    {order.status === 'PENDING' ? 'IN ATTESA'
+                      : order.status === 'CONFIRMED' ? 'CONFERMATO'
+                        : order.status === 'COMPLETED' ? 'PRONTO'
+                          : order.status === 'PICKED_UP' ? 'RITIRATO'
+                            : order.status || 'N/A'}
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <Separator />
-
-            {/* Totals */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotale</span>
-                <span className="font-medium">€{order.subTotal}</span>
               </div>
-              {order.discount != null && order.discount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Sconto</span>
-                  <span className="font-medium text-green-600">
-                    -€{order.discount.toFixed(2)}
-                  </span>
+
+              {/* Order Items */}
+              <div className="space-y-2">
+                <h4 className="font-semibold">Prodotti</h4>
+                <div className="space-y-3 max-h-[340px] overflow-y-auto ">
+                  {order.categorizedItems.map((catItem, catIndex) => (
+                    <div key={catIndex}>
+                      <h5 className="text-sm font-semibold text-amber-600 mb-2">
+                        {catItem.category.name}
+                      </h5>
+                      <div className="space-y-2">
+                        {catItem.items.map((item, itemIndex) => {
+                          const unitSurcharge = parseFloat(item.unitSurcharge?.toString() || '0');
+                          return (
+                            <div key={itemIndex} className="flex items-start justify-between p-2 bg-muted dark:bg-muted/40 rounded-lg">
+                              <div className="flex-1">
+                                <p className="font-medium">{item.food.name}</p>
+                                {item.notes && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Note: {item.notes}
+                                  </p>
+                                )}
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Quantità: {item.quantity} × {parseFloat(item.unitPrice.toString()).toFixed(2)} €
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold">
+                                  {parseFloat(item.total.toString()).toFixed(2)} €
+                                </p>
+                                {unitSurcharge > 0 && (
+                                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                                    (+{unitSurcharge.toFixed(2)} €)
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {order.surcharge != null && order.surcharge > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Maggiorazione</span>
-                  <span className="font-medium">
-                    +€{order.surcharge.toFixed(2)}
-                  </span>
+              </div>
+
+              {/* Total */}
+              <div className="p-3 bg-amber-500/20 rounded-lg border border-amber-500/20">
+                <div>
+                  <div className="items-center space-y-0 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">Subtotale:</div>
+                      <div className="font-bold text-muted-foreground">
+                        {parseFloat(order.subTotal).toFixed(2)} €
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">Totale sovrapprezzi:</div>
+                      <div className="font-bold text-amber-600 dark:text-amber-500">
+                        {parseFloat(order.surcharge?.toString() || '0').toFixed(2)} €
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">Sconto:</div>
+                      <div className="font-bold text-green-600 dark:text-green-500">
+                        {parseFloat(order.discount?.toString() || '0').toFixed(2)} €
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-semibold">Totale:</div>
+                    <div className="text-2xl font-bold text-amber-600 dark:text-amber-500">
+                      {parseFloat(order.total || order.subTotal).toFixed(2)} €
+                    </div>
+                  </div>
                 </div>
-              )}
-              {order.total && (
-                <div className="flex justify-between text-base font-semibold pt-2 border-t">
-                  <span>Totale</span>
-                  <span>€{order.total}</span>
+              </div>
+
+              {/* Cash Register - if available */}
+              {(order as any).cashRegister && (
+                <div className="p-3 bg-muted dark:bg-muted/40 rounded-lg">
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Cassa: </span>
+                    <span className="font-mono font-bold text-amber-600">
+                      {(order as any).cashRegister.name || (order as any).cashRegister}
+                    </span>
+                  </p>
                 </div>
               )}
             </div>
-          </div>
+          </ScrollArea>
         ) : null}
+
+
+        <DialogFooter>
+          <div className="flex items-center justify-end gap-2 w-full">
+            <Button
+              variant="outline"
+              className='cursor-pointer'
+              onClick={() => toast.error('Funzionalità di stampa non ancora implementata')}
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Stampa
+            </Button>
+            <Button
+              variant="outline"
+              className='cursor-pointer'
+              onClick={() => onOpenChange(false)}
+            >
+              Chiudi
+            </Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 }

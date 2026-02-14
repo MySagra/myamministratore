@@ -152,16 +152,11 @@ export interface FoodWithIngredients {
 }
 
 export interface PaginatedOrders {
-  orders: OrderListResponse[];
+  data: OrderListResponse[];
   pagination: {
     currentPage: number;
-    totalOrdersPages: number;
-    totalOrdersItems: number;
-    itemsPerPage: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-    nextPage: number | null;
-    prevPage: number | null;
+    totalPages: number;
+    totalItems: number;
   };
 }
 

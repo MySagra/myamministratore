@@ -18,10 +18,8 @@ interface OrdersTableProps {
   orders: OrderListResponse[];
   pagination: {
     currentPage: number;
-    totalOrdersPages: number;
-    totalOrdersItems: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
+    totalPages: number;
+    totalItems: number;
   };
   isLoading: boolean;
   onViewDetail: (order: OrderListResponse) => void;
@@ -270,17 +268,18 @@ export function OrdersTable({
         </Table>
       </div>
 
-      {pagination.totalOrdersPages > 1 && (
+
+      {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Pagina {pagination.currentPage} di {pagination.totalOrdersPages} (
-            {pagination.totalOrdersItems} ordini totali)
+            Pagina {pagination.currentPage} di {pagination.totalPages} (
+            {pagination.totalItems} ordini totali)
           </p>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              disabled={!pagination.hasPrevPage || isLoading}
+              disabled={pagination.currentPage <= 1 || isLoading}
               onClick={() => onPageChange(pagination.currentPage - 1)}
             >
               <ChevronLeftIcon className="h-4 w-4" />
@@ -289,7 +288,7 @@ export function OrdersTable({
             <Button
               variant="outline"
               size="sm"
-              disabled={!pagination.hasNextPage || isLoading}
+              disabled={pagination.currentPage >= pagination.totalPages || isLoading}
               onClick={() => onPageChange(pagination.currentPage + 1)}
             >
               Successiva
