@@ -15,6 +15,11 @@ export async function fetchApi<T>(
     ...options.headers,
   };
 
+  if (options.body instanceof FormData) {
+    // Let fetch set the correct Content-Type with boundary
+    delete (headers as any)["Content-Type"];
+  }
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,

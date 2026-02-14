@@ -97,7 +97,7 @@ export function IngredientsTable({
   }
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-md border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">

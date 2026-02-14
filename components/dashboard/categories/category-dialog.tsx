@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Category } from "@/lib/api-types";
-import { createCategory, updateCategory } from "@/actions/categories";
+import { createCategory, updateCategory, uploadCategoryImage } from "@/actions/categories";
 import {
   Dialog,
   DialogContent,
@@ -149,15 +149,23 @@ export function CategoryDialog({
         available: values.available,
       };
 
+      let savedCategory;
+
       if (isEditing && category) {
-        const updated = await updateCategory(category.id, data);
-        onSaved(updated);
+        savedCategory = await updateCategory(category.id, data);
         toast.success("Categoria aggiornata");
       } else {
-        const created = await createCategory(data);
-        onSaved(created);
+        savedCategory = await createCategory(data);
         toast.success("Categoria creata");
       }
+
+      if (imageFile && savedCategory) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        await uploadCategoryImage(savedCategory.id, formData);
+      }
+
+      onSaved(savedCategory);
       onOpenChange(false);
     } catch (error: any) {
       toast.error(error.message || "Errore durante il salvataggio");

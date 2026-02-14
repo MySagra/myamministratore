@@ -134,8 +134,7 @@ export function CategoriesTable({
       );
       onToggle(updated);
       toast.success(
-        `Categoria "${category.name}" ${
-          updated.available ? "abilitata" : "disabilitata"
+        `Categoria "${category.name}" ${updated.available ? "abilitata" : "disabilitata"
         }`
       );
     } catch (error) {
@@ -223,7 +222,7 @@ export function CategoriesTable({
   }
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-xl border overflow-hidden">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

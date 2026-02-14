@@ -35,10 +35,22 @@ export async function updateCategory(
     printerId?: string | null;
   }
 ): Promise<Category> {
+  // First fetch the current category to ensure we have all fields for the PUT request
+  const currentCategory = await getCategoryById(id);
+
+  // Merge current data with updates
+  const payload = {
+    name: data.name ?? currentCategory.name,
+    available: data.available ?? currentCategory.available,
+    position: data.position ?? currentCategory.position,
+    printerId: data.printerId !== undefined ? data.printerId : (currentCategory.printerId || undefined),
+  };
+
   const result = await fetchApi<Category>(API_ENDPOINTS.CATEGORIES.BY_ID(id), {
-    method: "PATCH",
-    body: JSON.stringify(data),
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
+
   revalidatePath("/dashboard/categories");
   return result;
 }
@@ -76,6 +88,15 @@ export async function toggleCategoryAvailability(
 export async function deleteCategory(id: string): Promise<void> {
   await fetchApi(API_ENDPOINTS.CATEGORIES.BY_ID(id), {
     method: "DELETE",
+  });
+  revalidatePath("/dashboard/categories");
+  revalidatePath("/dashboard/categories");
+}
+
+export async function uploadCategoryImage(id: string, formData: FormData): Promise<void> {
+  await fetchApi(API_ENDPOINTS.CATEGORIES.IMAGE(id), {
+    method: "PATCH",
+    body: formData,
   });
   revalidatePath("/dashboard/categories");
 }

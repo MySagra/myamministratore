@@ -20,13 +20,13 @@ import {
   LayoutGridIcon,
   UtensilsCrossedIcon,
   ClipboardListIcon,
-  LeafIcon,
+  Wheat,
   PrinterIcon,
   UsersIcon,
-  LandmarkIcon,
+  Coins,
   HomeIcon,
   LifeBuoyIcon,
-  SendIcon,
+  Github,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 
@@ -53,7 +53,7 @@ const data = {
     {
       title: "Ingredienti",
       url: "/dashboard/ingredients",
-      icon: LeafIcon,
+      icon: Wheat,
     },
   ],
   ordini: [
@@ -67,7 +67,7 @@ const data = {
     {
       title: "Casse",
       url: "/dashboard/cash-registers",
-      icon: LandmarkIcon,
+      icon: Coins,
     },
     {
       title: "Stampanti",
@@ -83,13 +83,13 @@ const data = {
   navSecondary: [
     {
       title: "Supporto",
-      url: "#",
+      url: "https://mysagra.com/#professional-services",
       icon: LifeBuoyIcon,
     },
     {
-      title: "Feedback",
-      url: "#",
-      icon: SendIcon,
+      title: "GitHub",
+      url: "https://github.com/MySagra",
+      icon: Github,
     },
   ],
 }

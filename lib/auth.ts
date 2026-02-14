@@ -1,33 +1,45 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+function extractRefreshTokenFromCookies(response: Response): string | null {
+  const setCookieHeader = response.headers.get("set-cookie");
+  if (!setCookieHeader) return null;
+
+  // set-cookie can contain multiple cookies separated by commas (or multiple headers)
+  const cookies = setCookieHeader.split(/,(?=\s*\w+=)/);
+  for (const cookie of cookies) {
+    const match = cookie.match(/refreshToken=([^;]+)/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 async function refreshAccessToken(token: any) {
   try {
     const response = await fetch(`${process.env.API_URL}/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        refreshToken: token.refreshToken,
-      }),
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `refreshToken=${token.refreshToken}`,
+      },
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("[Auth] Refresh token failed:", response.status, errorData);
       throw new Error("Refresh token failed");
     }
 
     const data = await response.json();
-    console.log("[Auth] Token refreshed successfully");
+
+    // Check if the backend sent a new refresh token cookie
+    const newRefreshToken = extractRefreshTokenFromCookies(response);
 
     return {
       ...token,
       accessToken: data.accessToken,
-      refreshToken: data.refreshToken ?? token.refreshToken,
+      refreshToken: newRefreshToken ?? token.refreshToken,
       accessTokenExpires: Date.now() + (data.expiresIn || 3600) * 1000,
     };
   } catch (error) {
-    console.error("[Auth] Refresh access token error:", error);
     return {
       ...token,
       error: "RefreshAccessTokenError",
@@ -58,31 +70,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error("[Auth] Login failed:", response.status, errorData);
             return null;
           }
 
           const data = await response.json();
 
           if (!data.accessToken) {
-            console.error("[Auth] No access token in response");
             return null;
           }
 
-          console.log("[Auth] Login successful, has refresh token:", !!data.refreshToken);
+          // Extract refresh token from Set-Cookie header (backend sends it as HTTP-only cookie)
+          const refreshToken = extractRefreshTokenFromCookies(response);
 
           return {
             id: String(data.user?.id || "1"),
             name: data.user?.username || (credentials.username as string),
             email: `${credentials.username}@myamministratore.local`,
             token: data.accessToken,
-            refreshToken: data.refreshToken || null,
+            refreshToken: refreshToken || undefined,
             role: data.user?.role || "admin",
             expiresIn: data.expiresIn || 3600,
           };
         } catch (error) {
-          console.error("[Auth] Login error:", error);
           return null;
         }
       },
@@ -109,12 +118,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Access token has expired, try to refresh it if we have a refresh token
       if (token.refreshToken) {
-        console.log("[Auth] Access token expired, attempting refresh");
         return refreshAccessToken(token);
       }
 
       // No refresh token available, return token as is (will trigger re-login)
-      console.warn("[Auth] Access token expired but no refresh token available");
       return {
         ...token,
         error: "RefreshAccessTokenError",
