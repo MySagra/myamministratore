@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 const userSchema = z.object({
@@ -45,6 +46,7 @@ interface UserDialogProps {
   user: User | null;
   roles: Role[];
   onSaved: (user: User) => void;
+  onDelete?: (user: User) => void;
 }
 
 export function UserDialog({
@@ -53,6 +55,7 @@ export function UserDialog({
   user,
   roles,
   onSaved,
+  onDelete,
 }: UserDialogProps) {
   const isEditing = !!user;
 
@@ -195,6 +198,20 @@ export function UserDialog({
               />
             </FieldGroup>
             <DialogFooter>
+              {isEditing && onDelete && user && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    onDelete(user);
+                    onOpenChange(false);
+                  }}
+                  className="mr-auto"
+                >
+                  <Trash2Icon className="h-4 w-4 mr-2" />
+                  Elimina
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"

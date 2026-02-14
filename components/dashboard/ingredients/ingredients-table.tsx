@@ -101,6 +101,7 @@ export function IngredientsTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
+            <TableHead className="w-12">Azioni</TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -110,14 +111,12 @@ export function IngredientsTable({
                 <SortIcon column="name" />
               </button>
             </TableHead>
-            <TableHead className="w-24 text-right">Azioni</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedIngredients.map((ingredient) => (
             <TableRow key={ingredient.id}>
-              <TableCell className="font-medium">{ingredient.name}</TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -126,6 +125,7 @@ export function IngredientsTable({
                   <PencilIcon className="h-4 w-4" />
                 </Button>
               </TableCell>
+              <TableCell className="font-medium">{ingredient.name}</TableCell>
             </TableRow>
           ))}
         </TableBody>

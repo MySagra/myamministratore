@@ -30,6 +30,7 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [pressedCell, setPressedCell] = useState<string | null>(null);
 
   useEffect(() => {
     const savedColumn = localStorage.getItem("foods-table-sort-column");
@@ -145,6 +146,7 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
+            <TableHead className="w-12">Azioni</TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -154,16 +156,16 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                 <SortIcon column="name" />
               </button>
             </TableHead>
-            <TableHead>
+            <TableHead className="text-right">
               <button
                 onClick={() => handleSort("category")}
-                className="flex items-center hover:text-foreground transition-colors font-medium"
+                className="flex items-center ml-auto hover:text-foreground transition-colors font-medium"
               >
                 Categoria
                 <SortIcon column="category" />
               </button>
             </TableHead>
-            <TableHead className="w-28">
+            <TableHead className="hidden md:table-cell w-28">
               <button
                 onClick={() => handleSort("price")}
                 className="flex items-center ml-auto hover:text-foreground transition-colors font-medium"
@@ -172,7 +174,7 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                 <SortIcon column="price" />
               </button>
             </TableHead>
-            <TableHead className="w-32">
+            <TableHead className="hidden md:table-cell w-32">
               <button
                 onClick={() => handleSort("available")}
                 className="flex items-center mx-auto hover:text-foreground transition-colors font-medium"
@@ -181,40 +183,12 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                 <SortIcon column="available" />
               </button>
             </TableHead>
-            <TableHead className="w-24 text-right">Azioni</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedFoods.map((food) => (
             <TableRow key={food.id}>
               <TableCell>
-                <div>
-                  <span className="font-medium">{food.name}</span>
-                  {food.description && (
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">
-                      {food.description}
-                    </p>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary">
-                  {food.category?.name || "—"}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right font-medium">
-                {formatPrice(food.price)}
-              </TableCell>
-              <TableCell className="text-center">
-                <div className="flex justify-center">
-                  <Checkbox
-                    checked={food.available}
-                    disabled={togglingId === food.id}
-                    onCheckedChange={() => handleToggle(food)}
-                  />
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -222,6 +196,56 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                 >
                   <PencilIcon className="h-4 w-4" />
                 </Button>
+              </TableCell>
+              <TableCell className="max-w-[150px] md:max-w-xs">
+                <div 
+                  className="relative overflow-hidden cursor-pointer md:cursor-auto select-none"
+                  onTouchStart={() => setPressedCell(`name-${food.id}`)}
+                  onTouchEnd={() => setPressedCell(null)}
+                  onMouseDown={() => setPressedCell(`name-${food.id}`)}
+                  onMouseUp={() => setPressedCell(null)}
+                  onMouseLeave={() => setPressedCell(null)}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <div className={`font-medium md:whitespace-normal ${pressedCell === `name-${food.id}` ? 'animate-scroll-text whitespace-nowrap' : 'truncate md:whitespace-normal'}`}>
+                    {food.name}
+                  </div>
+                  {food.description && (
+                    <p className="hidden md:block text-xs text-muted-foreground truncate max-w-xs">
+                      {food.description}
+                    </p>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell className="max-w-[100px] md:max-w-none text-right">
+                <div 
+                  className="relative overflow-hidden cursor-pointer md:cursor-auto select-none inline-block"
+                  onTouchStart={() => setPressedCell(`category-${food.id}`)}
+                  onTouchEnd={() => setPressedCell(null)}
+                  onMouseDown={() => setPressedCell(`category-${food.id}`)}
+                  onMouseUp={() => setPressedCell(null)}
+                  onMouseLeave={() => setPressedCell(null)}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  <Badge 
+                    variant="secondary" 
+                    className={`${pressedCell === `category-${food.id}` ? 'animate-scroll-text' : 'max-w-full truncate md:whitespace-normal'} whitespace-nowrap`}
+                  >
+                    {food.category?.name || "—"}
+                  </Badge>
+                </div>
+              </TableCell>
+              <TableCell className="hidden md:table-cell text-right font-medium">
+                {formatPrice(food.price)}
+              </TableCell>
+              <TableCell className="hidden md:table-cell text-center">
+                <div className="flex justify-center">
+                  <Checkbox
+                    checked={food.available}
+                    disabled={togglingId === food.id}
+                    onCheckedChange={() => handleToggle(food)}
+                  />
+                </div>
               </TableCell>
             </TableRow>
           ))}

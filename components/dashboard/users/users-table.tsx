@@ -12,18 +12,17 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
+import { PencilIcon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
 
 interface UsersTableProps {
   users: User[];
   onEdit: (user: User) => void;
-  onDelete: (user: User) => void;
 }
 
 type SortColumn = "username" | "role" | null;
 type SortDirection = "asc" | "desc";
 
-export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
+export function UsersTable({ users, onEdit }: UsersTableProps) {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
@@ -111,6 +110,7 @@ export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
+            <TableHead className="w-12">Azioni</TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("username")}
@@ -129,33 +129,23 @@ export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
                 <SortIcon column="role" />
               </button>
             </TableHead>
-            <TableHead className="w-24 text-right">Azioni</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedUsers.map((user) => (
             <TableRow key={user.id}>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(user)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+              </TableCell>
               <TableCell className="font-medium">{user.username}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{user.role.name}</Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(user)}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(user)}
-                  >
-                    <Trash2Icon className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
               </TableCell>
             </TableRow>
           ))}

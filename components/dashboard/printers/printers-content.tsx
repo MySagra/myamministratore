@@ -68,7 +68,6 @@ export function PrintersContent({ initialPrinters }: PrintersContentProps) {
       <PrintersTable
         printers={filteredPrinters}
         onEdit={handleEdit}
-        onDelete={handleDelete}
         onStatusUpdate={handleStatusUpdated}
       />
       <PrinterDialog
@@ -76,6 +75,7 @@ export function PrintersContent({ initialPrinters }: PrintersContentProps) {
         onOpenChange={setDialogOpen}
         printer={editingPrinter}
         onSaved={handleSaved}
+        onDelete={handleDelete}
       />
       <DeletePrinterDialog
         open={deleteDialogOpen}

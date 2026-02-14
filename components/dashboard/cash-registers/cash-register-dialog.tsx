@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormField,
   FormItem,
@@ -33,6 +33,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 const cashRegisterSchema = z.object({
@@ -49,6 +50,7 @@ interface CashRegisterDialogProps {
   cashRegister: CashRegister | null;
   printers: Printer[];
   onSaved: (cashRegister: CashRegister) => void;
+  onDelete?: (cashRegister: CashRegister) => void;
 }
 
 export function CashRegisterDialog({
@@ -57,6 +59,7 @@ export function CashRegisterDialog({
   cashRegister,
   printers,
   onSaved,
+  onDelete,
 }: CashRegisterDialogProps) {
   const isEditing = !!cashRegister;
 
@@ -111,7 +114,7 @@ export function CashRegisterDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-xl">
             {isEditing
               ? "Modifica Registratore di Cassa"
               : "Nuovo Registratore di Cassa"}
@@ -119,7 +122,7 @@ export function CashRegisterDialog({
         </DialogHeader>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup className="py-4">
+            <FieldGroup className="py-2">
               <FormField
                 control={form.control}
                 name="name"
@@ -139,13 +142,35 @@ export function CashRegisterDialog({
                   </FormItem>
                 )}
               />
+
+              <div className="flex items-center gap-3">
+                <FieldLabel htmlFor="enabled" className="mb-0">
+                  Abilitato
+                </FieldLabel>
+                <FormField
+                  control={form.control}
+                  name="enabled"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Checkbox
+                          id="enabled"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="defaultPrinterId"
                 render={({ field }) => (
                   <FormItem>
                     <Field>
-                      <FieldLabel>Stampante Predefinita</FieldLabel>
+                      <FieldLabel>Stampante Cassa</FieldLabel>
                       <FormControl>
                         <Select
                           value={field.value}
@@ -168,26 +193,22 @@ export function CashRegisterDialog({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="enabled"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field orientation="horizontal">
-                      <FieldLabel>Abilitato</FieldLabel>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
             </FieldGroup>
             <DialogFooter>
+              {isEditing && onDelete && cashRegister && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    onDelete(cashRegister);
+                    onOpenChange(false);
+                  }}
+                  className="mr-auto"
+                >
+                  <Trash2Icon className="h-4 w-4 mr-2" />
+                  Elimina
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"
@@ -199,8 +220,8 @@ export function CashRegisterDialog({
                 {form.formState.isSubmitting
                   ? "Salvataggio..."
                   : isEditing
-                    ? "Salva Modifiche"
-                    : "Crea Registratore"}
+                    ? "Salva"
+                    : "Crea"}
               </Button>
             </DialogFooter>
           </form>

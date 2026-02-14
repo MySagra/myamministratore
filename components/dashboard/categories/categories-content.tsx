@@ -73,7 +73,14 @@ export function CategoriesContent({ initialCategories }: CategoriesContentProps)
 
   function handleReorder(reordered: Category[]) {
     setCategories(reordered);
-    setHasOrderChanged(true);
+    
+    // Verifica se l'ordine è effettivamente cambiato rispetto a quello iniziale
+    const hasChanged = reordered.some((cat, index) => {
+      const originalCategory = initialCategories.find(c => c.id === cat.id);
+      return originalCategory && originalCategory.position !== index;
+    });
+    
+    setHasOrderChanged(hasChanged);
   }
 
   async function handleSaveOrder() {

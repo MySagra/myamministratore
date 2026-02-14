@@ -80,7 +80,6 @@ export function CashRegistersContent({
         cashRegisters={filteredCashRegisters}
         printers={printers}
         onEdit={handleEdit}
-        onDelete={handleDelete}
         onToggle={handleToggled}
       />
       <CashRegisterDialog
@@ -89,6 +88,7 @@ export function CashRegistersContent({
         cashRegister={editingCashRegister}
         printers={printers}
         onSaved={handleSaved}
+        onDelete={handleDelete}
       />
       <DeleteCashRegisterDialog
         open={deleteDialogOpen}

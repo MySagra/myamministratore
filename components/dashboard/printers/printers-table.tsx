@@ -20,13 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PencilIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
+import { PencilIcon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface PrintersTableProps {
   printers: Printer[];
   onEdit: (printer: Printer) => void;
-  onDelete: (printer: Printer) => void;
   onStatusUpdate: (updated: Printer) => void;
 }
 
@@ -172,6 +171,7 @@ export function PrintersTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
+            <TableHead className="w-12">Azioni</TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -217,12 +217,20 @@ export function PrintersTable({
                 <SortIcon column="status" />
               </button>
             </TableHead>
-            <TableHead className="w-24 text-right">Azioni</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedPrinters.map((printer) => (
             <TableRow key={printer.id}>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(printer)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+              </TableCell>
               <TableCell className="font-medium">{printer.name}</TableCell>
               <TableCell className="font-mono text-sm">{printer.ip}</TableCell>
               <TableCell className="text-center">{printer.port}</TableCell>
@@ -253,24 +261,6 @@ export function PrintersTable({
                     <SelectItem value="ERROR">Errore</SelectItem>
                   </SelectContent>
                 </Select>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(printer)}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(printer)}
-                  >
-                    <Trash2Icon className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
               </TableCell>
             </TableRow>
           ))}

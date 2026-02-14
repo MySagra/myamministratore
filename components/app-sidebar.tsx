@@ -64,6 +64,11 @@ const data = {
   ],
   gestione: [
     {
+      title: "Casse",
+      url: "/dashboard/cash-registers",
+      icon: LandmarkIcon,
+    },
+    {
       title: "Stampanti",
       url: "/dashboard/printers",
       icon: PrinterIcon,
@@ -72,11 +77,6 @@ const data = {
       title: "Utenti",
       url: "/dashboard/users",
       icon: UsersIcon,
-    },
-    {
-      title: "Casse",
-      url: "/dashboard/cash-registers",
-      icon: LandmarkIcon,
     },
   ],
   navSecondary: [

@@ -122,3 +122,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  @keyframes scroll-text {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-100% + 100px));
+    }
+  }
+
+  .animate-scroll-text {
+    display: inline-block;
+    animation: scroll-text 3s ease-in-out infinite alternate;
+  }
+
+  @media (min-width: 768px) {
+    .animate-scroll-text {
+      animation: none;
+    }
+  }
+}

@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 const printerSchema = z.object({
@@ -42,6 +43,7 @@ interface PrinterDialogProps {
   onOpenChange: (open: boolean) => void;
   printer: Printer | null;
   onSaved: (printer: Printer) => void;
+  onDelete?: (printer: Printer) => void;
 }
 
 export function PrinterDialog({
@@ -49,6 +51,7 @@ export function PrinterDialog({
   onOpenChange,
   printer,
   onSaved,
+  onDelete,
 }: PrinterDialogProps) {
   const isEditing = !!printer;
 
@@ -190,6 +193,20 @@ export function PrinterDialog({
               />
             </FieldGroup>
             <DialogFooter>
+              {isEditing && onDelete && printer && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    onDelete(printer);
+                    onOpenChange(false);
+                  }}
+                  className="mr-auto"
+                >
+                  <Trash2Icon className="h-4 w-4 mr-2" />
+                  Elimina
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"

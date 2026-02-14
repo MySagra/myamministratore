@@ -14,14 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PencilIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
+import { PencilIcon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface CashRegistersTableProps {
   cashRegisters: CashRegister[];
   printers: Printer[];
   onEdit: (cashRegister: CashRegister) => void;
-  onDelete: (cashRegister: CashRegister) => void;
   onToggle: (updated: CashRegister) => void;
 }
 
@@ -32,7 +31,6 @@ export function CashRegistersTable({
   cashRegisters,
   printers,
   onEdit,
-  onDelete,
   onToggle,
 }: CashRegistersTableProps) {
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -152,6 +150,7 @@ export function CashRegistersTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
+            <TableHead className="w-12">Azioni</TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -179,12 +178,20 @@ export function CashRegistersTable({
                 <SortIcon column="enabled" />
               </button>
             </TableHead>
-            <TableHead className="w-24 text-right">Azioni</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedCashRegisters.map((cr) => (
             <TableRow key={cr.id}>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(cr)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
+              </TableCell>
               <TableCell className="font-medium">{cr.name}</TableCell>
               <TableCell>
                 <Badge variant="outline">
@@ -200,24 +207,6 @@ export function CashRegistersTable({
                     disabled={togglingId === cr.id}
                     onCheckedChange={() => handleToggle(cr)}
                   />
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(cr)}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(cr)}
-                  >
-                    <Trash2Icon className="h-4 w-4 text-destructive" />
-                  </Button>
                 </div>
               </TableCell>
             </TableRow>

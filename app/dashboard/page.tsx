@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/logo";
 import { useSession } from "next-auth/react";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
 const navigationCards = [
   {
@@ -95,7 +96,7 @@ export default function DashboardPage() {
   const userName = formatName(session?.user?.name);
 
   return (
-    <div className="space-y-8 p-8">
+    <><DashboardHeader title="Home" /><div className="space-y-8 p-8">
       {/* Welcome Section */}
       <div className="flex items-center gap-6">
         <div className="shrink-0">
@@ -227,6 +228,6 @@ export default function DashboardPage() {
           </ul>
         </CardContent>
       </Card>
-    </div>
+    </div></>
   );
 }

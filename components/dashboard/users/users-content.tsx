@@ -65,7 +65,6 @@ export function UsersContent({ initialUsers, roles }: UsersContentProps) {
       <UsersTable
         users={filteredUsers}
         onEdit={handleEdit}
-        onDelete={handleDelete}
       />
       <UserDialog
         open={dialogOpen}
@@ -73,6 +72,7 @@ export function UsersContent({ initialUsers, roles }: UsersContentProps) {
         user={editingUser}
         roles={roles}
         onSaved={handleSaved}
+        onDelete={handleDelete}
       />
       <DeleteUserDialog
         open={deleteDialogOpen}
