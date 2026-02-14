@@ -1,0 +1,19 @@
+services:
+  amministratore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mysagra-amministratore
+    restart: always
+    ports:
+      - "5000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    networks:
+      - mysagra_default
+
+networks:
+  mysagra_default:
+    external: true
