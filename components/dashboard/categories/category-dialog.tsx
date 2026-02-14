@@ -11,6 +11,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -65,6 +75,7 @@ export function CategoryDialog({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -153,144 +164,172 @@ export function CategoryDialog({
     }
   }
 
+  function handleDeleteConfirm() {
+    if (category && onDelete) {
+      setShowDeleteConfirm(false);
+      onDelete(category);
+      onOpenChange(false);
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-xl select-none">
-            {isEditing ? "Modifica Categoria" : "Nuova Categoria"}
-          </DialogTitle>
-        </DialogHeader>
-        <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup className="py-2">
-              <Field>
-                <FieldLabel htmlFor="name">Nome</FieldLabel>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          id="name"
-                          autoComplete="off"
-                          placeholder="Nome della categoria"
-                          autoFocus
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </Field>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-xl select-none">
+              {isEditing ? "Modifica Categoria" : "Nuova Categoria"}
+            </DialogTitle>
+          </DialogHeader>
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup className="py-2">
+                <Field>
+                  <FieldLabel htmlFor="name">Nome</FieldLabel>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            id="name"
+                            autoComplete="off"
+                            placeholder="Nome della categoria"
+                            autoFocus
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </Field>
 
-              <div className="flex items-center gap-3">
-                <FieldLabel htmlFor="available" className="mb-0">
-                  Disponibile
-                </FieldLabel>
-                <FormField
-                  control={form.control}
-                  name="available"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Checkbox
-                          id="available"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                <div className="flex items-center gap-3">
+                  <FieldLabel htmlFor="available" className="mb-0">
+                    Disponibile
+                  </FieldLabel>
+                  <FormField
+                    control={form.control}
+                    name="available"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Checkbox
+                            id="available"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <Field>
-                <FieldLabel>Immagine</FieldLabel>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-                {imagePreview ? (
-                  <div
-                    className="relative cursor-pointer rounded-xl border overflow-hidden"
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <img
-                      src={imagePreview}
-                      alt="Anteprima"
-                      className="w-full h-40 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <UploadIcon className="h-6 w-6 text-white" />
+                <Field>
+                  <FieldLabel>Immagine</FieldLabel>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                  {imagePreview ? (
+                    <div
+                      className="relative cursor-pointer rounded-xl border overflow-hidden"
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <img
+                        src={imagePreview}
+                        alt="Anteprima"
+                        className="w-full h-40 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <UploadIcon className="h-6 w-6 text-white" />
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Empty
-                    className={`cursor-pointer border transition-colors h-40 ${
-                      isDragOver
+                  ) : (
+                    <Empty
+                      className={`cursor-pointer border transition-colors h-40 ${isDragOver
                         ? "border-primary bg-primary/5"
                         : "hover:border-primary/50"
-                    }`}
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
+                        }`}
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <EmptyHeader>
+                        <EmptyMedia>
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        </EmptyMedia>
+                        <EmptyTitle>Carica un&apos;immagine</EmptyTitle>
+                        <EmptyDescription>
+                          Trascina qui o clicca per selezionare un file
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  )}
+                </Field>
+              </FieldGroup>
+              <DialogFooter>
+                {isEditing && onDelete && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="mr-auto"
                   >
-                    <EmptyHeader>
-                      <EmptyMedia>
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      </EmptyMedia>
-                      <EmptyTitle>Carica un&apos;immagine</EmptyTitle>
-                      <EmptyDescription>
-                        Trascina qui o clicca per selezionare un file
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                    <Trash2Icon className="h-4 w-4 mr-2" />
+                    Elimina
+                  </Button>
                 )}
-              </Field>
-            </FieldGroup>
-            <DialogFooter>
-              {isEditing && onDelete && (
                 <Button
                   type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    onDelete(category);
-                    onOpenChange(false);
-                  }}
-                  className="mr-auto"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
                 >
-                  <Trash2Icon className="h-4 w-4 mr-2" />
-                  Elimina
+                  Annulla
                 </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Annulla
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting
-                  ? "Salvataggio..."
-                  : isEditing
-                    ? "Salva"
-                    : "Crea"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting
+                    ? "Salvataggio..."
+                    : isEditing
+                      ? "Salva"
+                      : "Crea"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler eliminare la categoria <span className="font-bold">{category?.name}</span>?
+              <br />
+              Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              variant="destructive"
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

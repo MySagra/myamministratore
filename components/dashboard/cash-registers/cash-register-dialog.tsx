@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -62,6 +72,7 @@ export function CashRegisterDialog({
   onDelete,
 }: CashRegisterDialogProps) {
   const isEditing = !!cashRegister;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const form = useForm<CashRegisterFormValues>({
     resolver: zodResolver(cashRegisterSchema),
@@ -110,123 +121,152 @@ export function CashRegisterDialog({
     }
   }
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-xl">
-            {isEditing
-              ? "Modifica Registratore di Cassa"
-              : "Nuovo Registratore di Cassa"}
-          </DialogTitle>
-        </DialogHeader>
-        <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup className="py-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Nome</FieldLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Nome del registratore"
-                          autoFocus
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
+  function handleDeleteConfirm() {
+    if (cashRegister && onDelete) {
+      setShowDeleteConfirm(false);
+      onDelete(cashRegister);
+      onOpenChange(false);
+    }
+  }
 
-              <div className="flex items-center gap-3">
-                <FieldLabel htmlFor="enabled" className="mb-0">
-                  Abilitato
-                </FieldLabel>
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              {isEditing
+                ? "Modifica Registratore di Cassa"
+                : "Nuovo Registratore di Cassa"}
+            </DialogTitle>
+          </DialogHeader>
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup className="py-2">
                 <FormField
                   control={form.control}
-                  name="enabled"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl>
-                        <Checkbox
-                          id="enabled"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
+                      <Field>
+                        <FieldLabel>Nome</FieldLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Nome del registratore"
+                            autoFocus
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <FormField
-                control={form.control}
-                name="defaultPrinterId"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Stampante Cassa</FieldLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleziona stampante" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {printers.map((printer) => (
-                              <SelectItem key={printer.id} value={printer.id}>
-                                {printer.name} ({printer.ip})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
+                <div className="flex items-center gap-3">
+                  <FieldLabel htmlFor="enabled" className="mb-0">
+                    Abilitato
+                  </FieldLabel>
+                  <FormField
+                    control={form.control}
+                    name="enabled"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Checkbox
+                            id="enabled"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="defaultPrinterId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Field>
+                        <FieldLabel>Stampante Cassa</FieldLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleziona stampante" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {printers.map((printer) => (
+                                <SelectItem key={printer.id} value={printer.id}>
+                                  {printer.name} ({printer.ip})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
+              </FieldGroup>
+              <DialogFooter>
+                {isEditing && onDelete && cashRegister && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="mr-auto"
+                  >
+                    <Trash2Icon className="h-4 w-4 mr-2" />
+                    Elimina
+                  </Button>
                 )}
-              />
-            </FieldGroup>
-            <DialogFooter>
-              {isEditing && onDelete && cashRegister && (
                 <Button
                   type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    onDelete(cashRegister);
-                    onOpenChange(false);
-                  }}
-                  className="mr-auto"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
                 >
-                  <Trash2Icon className="h-4 w-4 mr-2" />
-                  Elimina
+                  Annulla
                 </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Annulla
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting
-                  ? "Salvataggio..."
-                  : isEditing
-                    ? "Salva"
-                    : "Crea"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting
+                    ? "Salvataggio..."
+                    : isEditing
+                      ? "Salva"
+                      : "Crea"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler eliminare il registratore <span className="font-bold">{cashRegister?.name}</span>?
+              <br />
+              Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              variant="destructive"
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

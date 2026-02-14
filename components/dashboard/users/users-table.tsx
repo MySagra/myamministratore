@@ -110,7 +110,7 @@ export function UsersTable({ users, onEdit }: UsersTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-12">Azioni</TableHead>
+            <TableHead className="w-12"></TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("username")}

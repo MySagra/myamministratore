@@ -50,7 +50,6 @@ const statusVariants: Record<
 export function PrintersTable({
   printers,
   onEdit,
-  onDelete,
   onStatusUpdate,
 }: PrintersTableProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -171,7 +170,7 @@ export function PrintersTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-12">Azioni</TableHead>
+            <TableHead className="w-12"></TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -181,7 +180,7 @@ export function PrintersTable({
                 <SortIcon column="name" />
               </button>
             </TableHead>
-            <TableHead className="w-40">
+            <TableHead className="w-40 hidden md:table-cell">
               <button
                 onClick={() => handleSort("ip")}
                 className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -190,7 +189,7 @@ export function PrintersTable({
                 <SortIcon column="ip" />
               </button>
             </TableHead>
-            <TableHead className="w-20">
+            <TableHead className="w-20 hidden md:table-cell">
               <button
                 onClick={() => handleSort("port")}
                 className="flex items-center mx-auto hover:text-foreground transition-colors font-medium"
@@ -199,7 +198,7 @@ export function PrintersTable({
                 <SortIcon column="port" />
               </button>
             </TableHead>
-            <TableHead className="w-48">
+            <TableHead className="w-48 hidden md:table-cell">
               <button
                 onClick={() => handleSort("description")}
                 className="flex items-center hover:text-foreground transition-colors font-medium"
@@ -232,9 +231,9 @@ export function PrintersTable({
                 </Button>
               </TableCell>
               <TableCell className="font-medium">{printer.name}</TableCell>
-              <TableCell className="font-mono text-sm">{printer.ip}</TableCell>
-              <TableCell className="text-center">{printer.port}</TableCell>
-              <TableCell className="text-muted-foreground text-sm">
+              <TableCell className="font-mono text-sm hidden md:table-cell">{printer.ip}</TableCell>
+              <TableCell className="text-center hidden md:table-cell">{printer.port}</TableCell>
+              <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                 {printer.description || "-"}
               </TableCell>
               <TableCell className="text-center">

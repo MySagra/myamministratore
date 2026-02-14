@@ -146,7 +146,7 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-12">Azioni</TableHead>
+            <TableHead className="w-12"></TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -198,7 +198,7 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                 </Button>
               </TableCell>
               <TableCell className="max-w-[150px] md:max-w-xs">
-                <div 
+                <div
                   className="relative overflow-hidden cursor-pointer md:cursor-auto select-none"
                   onTouchStart={() => setPressedCell(`name-${food.id}`)}
                   onTouchEnd={() => setPressedCell(null)}
@@ -218,7 +218,7 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                 </div>
               </TableCell>
               <TableCell className="max-w-[100px] md:max-w-none text-right">
-                <div 
+                <div
                   className="relative overflow-hidden cursor-pointer md:cursor-auto select-none inline-block"
                   onTouchStart={() => setPressedCell(`category-${food.id}`)}
                   onTouchEnd={() => setPressedCell(null)}
@@ -227,8 +227,8 @@ export function FoodsTable({ foods, onEdit, onToggle }: FoodsTableProps) {
                   onMouseLeave={() => setPressedCell(null)}
                   onContextMenu={(e) => e.preventDefault()}
                 >
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`${pressedCell === `category-${food.id}` ? 'animate-scroll-text' : 'max-w-full truncate md:whitespace-normal'} whitespace-nowrap`}
                   >
                     {food.category?.name || "—"}

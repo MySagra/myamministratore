@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -28,7 +29,7 @@ import {
   SendIcon,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { Logo } from "@/components/logo"
+
 
 const data = {
   home: [
@@ -110,7 +111,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
                 <div className="flex aspect-square size-16 items-center justify-center rounded-lg overflow-hidden">
-                  <Logo className="w-full h-full" />
+                  <img src="/icona.png" alt="MySagra Logo" className="object-contain p-2 w-full h-full" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">MyAmministratore</span>

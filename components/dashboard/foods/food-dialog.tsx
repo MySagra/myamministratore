@@ -13,6 +13,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -76,6 +86,7 @@ export function FoodDialog({
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [selectedPrinterId, setSelectedPrinterId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const form = useForm<FoodFormValues>({
     resolver: zodResolver(foodSchema),
@@ -113,12 +124,12 @@ export function FoodDialog({
     setIngredientSearch("");
   }, [food, open, categories, form]);
 
-  const filteredIngredients = ingredients.filter(ing => 
+  const filteredIngredients = ingredients.filter(ing =>
     ing.name.toLowerCase().includes(ingredientSearch.toLowerCase())
   );
 
   function toggleIngredient(ingredientId: string) {
-    setSelectedIngredients(prev => 
+    setSelectedIngredients(prev =>
       prev.includes(ingredientId)
         ? prev.filter(id => id !== ingredientId)
         : [...prev, ingredientId]
@@ -151,91 +162,76 @@ export function FoodDialog({
     }
   }
 
+  function handleDeleteConfirm() {
+    if (food && onDelete) {
+      setShowDeleteConfirm(false);
+      onDelete(food);
+      onOpenChange(false);
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-xl">
-            {isEditing ? "Modifica Cibo" : "Nuovo Cibo"}
-          </DialogTitle>
-        </DialogHeader>
-        <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup className="py-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Nome</FieldLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Nome del cibo" autoFocus />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-center gap-3">
-                <FieldLabel htmlFor="available" className="mb-0">
-                  Disponibile
-                </FieldLabel>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              {isEditing ? "Modifica Cibo" : "Nuovo Cibo"}
+            </DialogTitle>
+          </DialogHeader>
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup className="py-2">
                 <FormField
                   control={form.control}
-                  name="available"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Checkbox
-                          id="available"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Descrizione</FieldLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Descrizione opzionale"
-                          rows={3}
-                          className="resize-none"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="price"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
                       <Field>
-                        <FieldLabel>Prezzo (€)</FieldLabel>
+                        <FieldLabel>Nome</FieldLabel>
                         <FormControl>
-                          <Input
+                          <Input {...field} placeholder="Nome del cibo" autoFocus />
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex items-center gap-3">
+                  <FieldLabel htmlFor="available" className="mb-0">
+                    Disponibile
+                  </FieldLabel>
+                  <FormField
+                    control={form.control}
+                    name="available"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Checkbox
+                            id="available"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Field>
+                        <FieldLabel>Descrizione</FieldLabel>
+                        <FormControl>
+                          <Textarea
                             {...field}
-                            value={String(field.value ?? "")}
-                            type="number"
-                            autoComplete="off"
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
+                            placeholder="Descrizione opzionale"
+                            rows={3}
+                            className="resize-none"
                           />
                         </FormControl>
                         <FormMessage />
@@ -243,136 +239,178 @@ export function FoodDialog({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="categoryId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Field>
-                        <FieldLabel>Categoria</FieldLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleziona categoria" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                  {cat.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </Field>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Field>
+                          <FieldLabel>Prezzo (€)</FieldLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={String(field.value ?? "")}
+                              type="number"
+                              autoComplete="off"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </Field>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Field>
+                          <FieldLabel>Categoria</FieldLabel>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleziona categoria" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </Field>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <Accordion type="single" collapsible className="border rounded-xl">
-                <AccordionItem value="ingredients" className="border-none">
-                  <AccordionTrigger className="px-4 hover:no-underline">
-                    Ingredienti
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4">
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Cerca..."
-                          value={ingredientSearch}
-                          onChange={(e) => setIngredientSearch(e.target.value)}
-                          className="pl-9"
-                        />
+                <Accordion type="single" collapsible className="border rounded-xl">
+                  <AccordionItem value="ingredients" className="border-none">
+                    <AccordionTrigger className="px-4 hover:no-underline">
+                      Ingredienti
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4">
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Cerca..."
+                            value={ingredientSearch}
+                            onChange={(e) => setIngredientSearch(e.target.value)}
+                            className="pl-9"
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {filteredIngredients.map((ingredient) => {
+                            const isSelected = selectedIngredients.includes(ingredient.id);
+                            return (
+                              <Badge
+                                key={ingredient.id}
+                                variant={isSelected ? "default" : "outline"}
+                                className={`cursor-pointer transition-colors ${isSelected
+                                  ? "bg-yellow-500 hover:bg-yellow-600 text-black"
+                                  : "hover:bg-accent"
+                                  }`}
+                                onClick={() => toggleIngredient(ingredient.id)}
+                              >
+                                {ingredient.name}
+                              </Badge>
+                            );
+                          })}
+                        </div>
                       </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="printer" className="border-none">
+                    <AccordionTrigger className="px-4 hover:no-underline">
+                      Stampante
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4">
                       <div className="flex flex-wrap gap-2">
-                        {filteredIngredients.map((ingredient) => {
-                          const isSelected = selectedIngredients.includes(ingredient.id);
+                        {printers.map((printer) => {
+                          const isSelected = selectedPrinterId === printer.id;
                           return (
                             <Badge
-                              key={ingredient.id}
+                              key={printer.id}
                               variant={isSelected ? "default" : "outline"}
-                              className={`cursor-pointer transition-colors ${
-                                isSelected 
-                                  ? "bg-yellow-500 hover:bg-yellow-600 text-black" 
-                                  : "hover:bg-accent"
-                              }`}
-                              onClick={() => toggleIngredient(ingredient.id)}
+                              className={`cursor-pointer transition-colors ${isSelected
+                                ? "bg-yellow-500 hover:bg-yellow-600 text-black"
+                                : "hover:bg-accent"
+                                }`}
+                              onClick={() => setSelectedPrinterId(isSelected ? null : printer.id)}
                             >
-                              {ingredient.name}
+                              {printer.name}
                             </Badge>
                           );
                         })}
                       </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="printer" className="border-none">
-                  <AccordionTrigger className="px-4 hover:no-underline">
-                    Stampante
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4">
-                    <div className="flex flex-wrap gap-2">
-                      {printers.map((printer) => {
-                        const isSelected = selectedPrinterId === printer.id;
-                        return (
-                          <Badge
-                            key={printer.id}
-                            variant={isSelected ? "default" : "outline"}
-                            className={`cursor-pointer transition-colors ${
-                              isSelected 
-                                ? "bg-yellow-500 hover:bg-yellow-600 text-black" 
-                                : "hover:bg-accent"
-                            }`}
-                            onClick={() => setSelectedPrinterId(isSelected ? null : printer.id)}
-                          >
-                            {printer.name}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </FieldGroup>
-            <DialogFooter>
-              {isEditing && onDelete && food && (
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </FieldGroup>
+              <DialogFooter>
+                {isEditing && onDelete && food && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="mr-auto"
+                  >
+                    <Trash2Icon className="h-4 w-4 mr-2" />
+                    Elimina
+                  </Button>
+                )}
                 <Button
                   type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    onDelete(food);
-                    onOpenChange(false);
-                  }}
-                  className="mr-auto"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
                 >
-                  <Trash2Icon className="h-4 w-4 mr-2" />
-                  Elimina
+                  Annulla
                 </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Annulla
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting
-                  ? "Salvataggio..."
-                  : isEditing
-                    ? "Salva"
-                    : "Crea"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting
+                    ? "Salvataggio..."
+                    : isEditing
+                      ? "Salva"
+                      : "Crea"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler eliminare <span className="font-bold">{food?.name}</span>?
+              <br />
+              Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              variant="destructive"
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

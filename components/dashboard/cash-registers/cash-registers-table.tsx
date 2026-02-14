@@ -150,7 +150,7 @@ export function CashRegistersTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-12">Azioni</TableHead>
+            <TableHead className="w-12"></TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}
@@ -165,7 +165,7 @@ export function CashRegistersTable({
                 onClick={() => handleSort("printer")}
                 className="flex items-center hover:text-foreground transition-colors font-medium"
               >
-                Stampante Predefinita
+                Stampante
                 <SortIcon column="printer" />
               </button>
             </TableHead>

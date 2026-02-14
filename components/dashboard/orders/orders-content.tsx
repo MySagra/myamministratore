@@ -80,6 +80,10 @@ export function OrdersContent({ initialData, dateFrom, dateTo }: OrdersContentPr
     loadOrders({ search: searchQuery, status: statusFilter, page: pagination.currentPage });
   }
 
+  function handleRefresh() {
+    loadOrders({ search: searchQuery, status: statusFilter, page: pagination.currentPage });
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <OrdersToolbar
@@ -87,6 +91,8 @@ export function OrdersContent({ initialData, dateFrom, dateTo }: OrdersContentPr
         onSearchChange={handleSearch}
         statusFilter={statusFilter}
         onStatusFilterChange={handleStatusFilter}
+        onRefresh={handleRefresh}
+        isLoading={isLoading}
       />
       <OrdersTable
         orders={orders}

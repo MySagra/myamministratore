@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +64,7 @@ export function PrinterDialog({
   onDelete,
 }: PrinterDialogProps) {
   const isEditing = !!printer;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const form = useForm<PrinterFormValues>({
     resolver: zodResolver(printerSchema),
@@ -109,122 +120,151 @@ export function PrinterDialog({
     }
   }
 
+  function handleDeleteConfirm() {
+    if (printer && onDelete) {
+      setShowDeleteConfirm(false);
+      onDelete(printer);
+      onOpenChange(false);
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Modifica Stampante" : "Nuova Stampante"}
-          </DialogTitle>
-        </DialogHeader>
-        <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup className="py-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Nome</FieldLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Nome della stampante"
-                          autoFocus
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing ? "Modifica Stampante" : "Nuova Stampante"}
+            </DialogTitle>
+          </DialogHeader>
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup className="py-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Field>
+                        <FieldLabel>Nome</FieldLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Nome della stampante"
+                            autoFocus
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ip"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Field>
+                        <FieldLabel>Indirizzo IP</FieldLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="192.168.1.100" />
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="port"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Field>
+                        <FieldLabel>Porta</FieldLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={String(field.value ?? "")}
+                            type="number"
+                            placeholder="9100"
+                            min={0}
+                            max={65535}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Field>
+                        <FieldLabel>Descrizione</FieldLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Descrizione opzionale" />
+                        </FormControl>
+                        <FormMessage />
+                      </Field>
+                    </FormItem>
+                  )}
+                />
+              </FieldGroup>
+              <DialogFooter>
+                {isEditing && onDelete && printer && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="mr-auto"
+                  >
+                    <Trash2Icon className="h-4 w-4 mr-2" />
+                    Elimina
+                  </Button>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="ip"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Indirizzo IP</FieldLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="192.168.1.100" />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="port"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Porta</FieldLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={String(field.value ?? "")}
-                          type="number"
-                          placeholder="9100"
-                          min={0}
-                          max={65535}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <Field>
-                      <FieldLabel>Descrizione</FieldLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Descrizione opzionale" />
-                      </FormControl>
-                      <FormMessage />
-                    </Field>
-                  </FormItem>
-                )}
-              />
-            </FieldGroup>
-            <DialogFooter>
-              {isEditing && onDelete && printer && (
                 <Button
                   type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    onDelete(printer);
-                    onOpenChange(false);
-                  }}
-                  className="mr-auto"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
                 >
-                  <Trash2Icon className="h-4 w-4 mr-2" />
-                  Elimina
+                  Annulla
                 </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Annulla
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting
-                  ? "Salvataggio..."
-                  : isEditing
-                    ? "Salva Modifiche"
-                    : "Crea Stampante"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting
+                    ? "Salvataggio..."
+                    : isEditing
+                      ? "Salva"
+                      : "Crea"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler eliminare la stampante <span className="font-bold">{printer?.name}</span>?
+              <br />
+              Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              variant="destructive"
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

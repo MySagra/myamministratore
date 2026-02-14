@@ -68,7 +68,7 @@ export function IngredientsTable({
     return [...ingredients].sort((a, b) => {
       const aValue = a.name.toLowerCase();
       const bValue = b.name.toLowerCase();
-      
+
       if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
@@ -101,7 +101,7 @@ export function IngredientsTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
-            <TableHead className="w-12">Azioni</TableHead>
+            <TableHead className="w-12"></TableHead>
             <TableHead>
               <button
                 onClick={() => handleSort("name")}

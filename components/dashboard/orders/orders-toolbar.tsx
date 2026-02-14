@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -8,13 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, RefreshCw } from "lucide-react";
 
 interface OrdersToolbarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
+  onRefresh: () => void;
+  isLoading?: boolean;
 }
 
 export function OrdersToolbar({
@@ -22,6 +25,8 @@ export function OrdersToolbar({
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
+  onRefresh,
+  isLoading,
 }: OrdersToolbarProps) {
   return (
     <div className="flex items-center gap-4 flex-wrap">
@@ -46,6 +51,15 @@ export function OrdersToolbar({
           <SelectItem value="PICKED_UP">Ritirato</SelectItem>
         </SelectContent>
       </Select>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={onRefresh}
+        disabled={isLoading}
+        title="Aggiorna ordini"
+      >
+        <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+      </Button>
     </div>
   );
 }
